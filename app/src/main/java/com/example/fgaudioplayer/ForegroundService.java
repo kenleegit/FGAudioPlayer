@@ -9,20 +9,42 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.*;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+
 public class ForegroundService extends Service {
     private static final String LOG_TAG = "ForegroundService";
     public static boolean IS_SERVICE_RUNNING = false;
-
+    private SimpleExoPlayer player;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //Audio player; Refer to Google I/O 2018 https://www.youtube.com/watch?v=svdq1BWl4r8
+        //final Uri mySourceUri = Uri.parse("http://ly729.out.airtime.pro:8000/ly729_b");
+        final Uri mySourceUri = Uri.parse("https://txly2.net/ly/audio/exposition-be-ot-pentateuch-genesis/exposition-be-ot-pentateuch-genesis01.mp3");
+
+        final Context context = this;
+        player = ExoPlayerFactory.newSimpleInstance(context, new DefaultTrackSelector());
+        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(
+                context, Util.getUserAgent(context, "FGAudioPlayer"));
+        MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(mySourceUri);
+        player.prepare(mediaSource);
+        player.setPlayWhenReady(true);
     }
 
     @Override
@@ -51,7 +73,7 @@ public class ForegroundService extends Service {
             stopForeground(true);
             stopSelf();
         }
-        return START_STICKY;
+        return START_STICKY; //service is not immediately destroyed and we explicitly destroy it
     }
 
     private void showNotification() {
@@ -110,6 +132,9 @@ public class ForegroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        player.release();
+        player = null;
+
         Log.i(LOG_TAG, "In onDestroy");
         Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
     }

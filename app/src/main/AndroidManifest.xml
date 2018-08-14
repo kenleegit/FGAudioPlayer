@@ -5,6 +5,9 @@
     <!--http://www.tutorialsface.com/2015/09/simple-android-foreground-service-example/ -->
     <!--https://stackoverflow.com/questions/47531742/startforeground-fail-after-upgrade-to-android-8-1 -->
     <!--https://stackoverflow.com/questions/47611123/oreo-starting-a-service-in-the-foreground -->
+    <!--Audio player; Refer to Google I/O 2018 https://www.youtube.com/watch?v=svdq1BWl4r8 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
